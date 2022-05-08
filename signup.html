@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1.0"
+		/>
+		<title>Home</title>
+
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@9.17.2/dist/sweetalert2.min.css">
+		<link rel="stylesheet" href="style.css"/>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+	</head>
+
+	<body>
+		<div class="parentDiv">
+            <div class="container">
+                <div class="cover">
+                    <div class="content">
+                        <img src="https://dl.dropboxusercontent.com/s/xd3mr52akhqolz0/ic_cover.png?dl=0" alt="">
+                        <p class="sub">RVM-19</p>
+                    </div>
+                </div>
+                <form action="" id="signup">
+                    <h3>Let's Get Started!</h3>
+                    <h4>Create your new RVM-19 account.</h4>
+                    <div class="formLayout">
+                        <div class="field__layout">
+                            <input id="txt_username" type="text" placeholder="Enter Username" required>
+                        </div>
+                        <div class="field__layout">
+                            <input id="txt_email" type="text" placeholder="Enter Email" required>
+                        </div>
+                        <div class="field__layout">
+                            <input id="txt_pass" type="password" placeholder="Enter Password" required>
+                        </div>
+                        <div class="field__layout">
+                            <input id="txt_pass2" type="password" placeholder="Re-enter Password" required>
+                        </div>
+                        <input id="submit_btn" type="submit" value="Sign Up">
+                    </div>
+                </form>
+                <div class="forgot__layout">
+                    <a href="index.html">Already have an account? Sign in.</a>
+                </div>
+            </div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.4.7/dist/sweetalert2.all.min.js"></script>
+        <script type="module">
+            import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
+        
+            const firebaseConfig = {
+                apiKey: "AIzaSyB_TfQJQfMBhrsGjUMIrx5154SWUjjr2p4",
+                authDomain: "rvm-19-e9b1c.firebaseapp.com",
+                databaseURL: "https://rvm-19-e9b1c-default-rtdb.firebaseio.com",
+                projectId: "rvm-19-e9b1c",
+                storageBucket: "rvm-19-e9b1c.appspot.com",
+                messagingSenderId: "1069847515862",
+                appId: "1:1069847515862:web:289f226cb5b89dc39f6f77"
+            };
+      
+            // Initialize Firebase
+            const app = initializeApp(firebaseConfig);
+
+            import {getDatabase,ref,set, child, get}
+                from "https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js";
+
+             const db = getDatabase();
+
+            const username = document.getElementById('txt_username');
+            const emailid = document.getElementById('txt_email');
+            const password = document.getElementById('txt_pass');
+            const password2 = document.getElementById('txt_pass2');
+            const submit = document.getElementById('submit_btn');
+
+            const allCapsAlpha = [..."ABCDEFGHIJKLMNOPQRSTUVWXYZ"]; 
+            const allLowerAlpha = [..."abcdefghijklmnopqrstuvwxyz"]; 
+            const allNumbers = [..."0123456789"];
+
+            const base = [...allCapsAlpha, ...allNumbers, ...allLowerAlpha];
+            const generator = (base, len) => {
+            return [...Array(len)]
+                .map(i => base[Math.random()*base.length|0])
+                .join('');
+            };
+
+            function Validation() {
+                let userregex = /[a-zA-Z0-9]{5,}/;
+                let email = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
+                if(!userregex.test(username.value)) {
+                    alert("Invalid User");
+                    return false;
+                }
+
+                if(!email.test(emailid.value)) {
+                    alert("Invalid Email");
+                    return false;
+                }
+
+                if(password.value !== password2.value) {
+                    alert("Password did not match");
+                    return false;
+                }
+                return true;
+            }
+
+            function RegisterUser(){
+                if(!Validation()){
+                    return;
+                }
+                const dbRef = ref(db);
+
+                get(child(dbRef, "UsersList/"+ username.value)).then((snapshot)=>{
+                    if(snapshot.exists()){
+                        alert("Account Already Exits!");
+                    }
+                    else{
+                        set(ref(db, "UsersList/"+ username.value),
+                        {
+                            username: username.value,
+                            email: emailid.value,
+                            password: password.value,
+                            address: generator(base, 12),
+                            points: "0"
+                        })
+                        .then(()=>{
+                            setTimeout(() => {
+                                Swal.fire(
+                                    'Good job!',
+                                    'Account Registered Successfully!',
+                                    'success'
+                                ).then(()=>{
+                                    window.location.href = "index.html";
+                                })
+                            }, 100);
+                        })
+                        .catch((error)=>{
+                            alert("Error"+error);
+                        });
+                    }
+                });
+            }
+
+            function encPass(){
+                var pass12=CryptoJS.AES.encrypt(password.value, password.value);
+                return pass12.toString();
+            }
+
+            //submit.addEventListener('click',RegisterUser);
+            submit.addEventListener("click", function (event) {
+                event.preventDefault();
+                RegisterUser();
+            });
+        </script>
+	</body>
+</html>

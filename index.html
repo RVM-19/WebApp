@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Home</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@9.17.2/dist/sweetalert2.min.css">
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+</head>
+
+<body>
+    <div class="parentDiv">
+        <div class="container">
+            <div class="cover">
+                <div class="content">
+                    <img src="https://dl.dropboxusercontent.com/s/xd3mr52akhqolz0/ic_cover.png?dl=0" alt="">
+                </div>
+            </div>
+            <form action="" id="signin">
+                <h3>Welcome! Let's Get Started!</h3>
+                <h4>Log in to your existing RVM-19 account.</h4>
+                <div class="formLayout">
+                    <div class="field__layout">
+                        <input id="txt_username" type="text" placeholder="Username" required>
+                    </div>
+                    <div class="field__layout">
+                        <input id="txt_pass" type="password" placeholder="Password" required>
+                    </div>
+                    <input id="submit_btn" type="submit" value="Sign In">
+                    <h2><span>or</span></h2>
+                </div>
+            </form>
+            <div class="btn__layout">
+                <a href="signup.html">
+                    <div class="nextPage">Register</div>
+                </a>
+            </div>
+            <div class="forgot__layout">
+                <a href="forgot.html">Forgot password?</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.4.7/dist/sweetalert2.all.min.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyB_TfQJQfMBhrsGjUMIrx5154SWUjjr2p4",
+            authDomain: "rvm-19-e9b1c.firebaseapp.com",
+            databaseURL: "https://rvm-19-e9b1c-default-rtdb.firebaseio.com",
+            projectId: "rvm-19-e9b1c",
+            storageBucket: "rvm-19-e9b1c.appspot.com",
+            messagingSenderId: "1069847515862",
+            appId: "1:1069847515862:web:289f226cb5b89dc39f6f77"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+
+        import { getDatabase, ref, set, child, get, update }
+            from "https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js";
+
+        const db = getDatabase();
+
+        const username = document.getElementById('txt_username');
+        const pass = document.getElementById('txt_pass');
+        const submit = document.getElementById('submit_btn');
+
+        setInterval(function () {
+            GetCurrentUser();
+        }, 1000);
+
+        var curUser;
+        function GetCurrentUser() {
+            const dbRef = ref(db);
+            get(child(dbRef, "CurrentUser")).then((snapshot) => {
+                curUser = (snapshot.val().username)
+            });
+        }
+
+        function AuthenticateUser() {
+            const dbRef = ref(db);
+
+            get(child(dbRef, "UsersList/" + username.value)).then((snapshot) => {
+                if (snapshot.exists()) {
+                    let dbpass = snapshot.val().password;
+                    if (dbpass == pass.value) {
+                        setTimeout(() => {
+                            Swal.fire(
+                                'Good job!',
+                                'Log in Success!',
+                                'success'
+                            ).then(() => {
+                                login(snapshot.val());
+                            })
+                        }, 100);
+                    }
+                    else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            text: 'Incorrect Password!',
+                        })
+                    }
+                }
+                else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: 'Account does not exist!',
+                    })
+                }
+            });
+        }
+
+        function decPass(dbpass) {
+            var pass12 = CryptoJS.AES.decrypt(dbpass, password.value);
+            return pass12.toString(CryptoJS.enc.Utf8);
+        }
+
+        function login(user) {
+            sessionStorage.setItem('user', JSON.stringify(user));
+            window.location = "home.html";
+        }
+
+        window.onload = function () {
+            const dbRef = ref(db);
+            update(ref(db, "CurrentUser/"), {
+                username: "guest",
+                status: "default",
+                pending: 0,
+            });
+        };
+
+        submit.addEventListener("click", function (event) {
+            event.preventDefault();
+            var guest1 = "guest";
+            if (curUser === guest1) {
+                AuthenticateUser();
+            }
+            else {
+                setTimeout(() => {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: 'System is Busy!',
+                    })
+                }, 100);
+            }
+            //AuthenticateUser();
+        });
+    </script>
+</body>
+
+</html>

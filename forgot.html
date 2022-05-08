@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1.0"
+		/>
+		<title>Home</title>
+
+        <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css"/>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@9.17.2/dist/sweetalert2.min.css">
+		<link rel="stylesheet" href="style.css"/>
+	</head>
+
+	<body>
+		<div class="parentDiv">
+            <div class="container">
+                <div class="cover">
+                    <div class="content">
+                        <img src="https://dl.dropboxusercontent.com/s/xd3mr52akhqolz0/ic_cover.png?dl=0" alt="">
+                        <p class="sub">RVM-19</p>
+                    </div>
+                </div>
+                <form action="" id="signin">
+                    <h3>Welcome! Let's Get Started!</h3>
+                    <h4>Fill up the required fields.</h4>
+                    <div class="formLayout">
+                        <div class="field__layout">
+                            <input id="txt_username" type="text" placeholder="Enter your username" required>
+                        </div>
+                        <input id="submit_btn" type="submit" value="Submit">
+                    </div>
+                </form>
+                <div class="forgot__layout">
+                    <a href="index.html">Go back to Log In Page.</a>
+                </div>
+            </div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.4.7/dist/sweetalert2.all.min.js"></script>
+        <script type="module">
+            import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
+        
+            const firebaseConfig = {
+                apiKey: "AIzaSyB_TfQJQfMBhrsGjUMIrx5154SWUjjr2p4",
+                authDomain: "rvm-19-e9b1c.firebaseapp.com",
+                databaseURL: "https://rvm-19-e9b1c-default-rtdb.firebaseio.com",
+                projectId: "rvm-19-e9b1c",
+                storageBucket: "rvm-19-e9b1c.appspot.com",
+                messagingSenderId: "1069847515862",
+                appId: "1:1069847515862:web:289f226cb5b89dc39f6f77"
+            };
+      
+            // Initialize Firebase
+            const app = initializeApp(firebaseConfig);
+
+            import {getDatabase,ref,set, child, get}
+                from "https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js";
+
+             const db = getDatabase();
+
+            const username = document.getElementById('txt_username');
+            const submit = document.getElementById('submit_btn');
+            let signoutlink = document.getElementById('signoutlink');
+
+            function AuthenticateUser(){
+                const dbRef = ref(db);
+
+                get(child(dbRef, "UsersList/"+ username.value)).then((snapshot)=>{
+                    if(snapshot.exists()){
+                        let dbpass = snapshot.val().password;
+                        Swal.fire('Your Password is ' + dbpass)
+                    }
+                    else{
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            text: 'Account does not exist!',
+                        })
+                    }
+                });
+            }
+
+            //submit.addEventListener('click',AuthenticateUser);
+            submit.addEventListener("click", function (event) {
+                event.preventDefault();
+                AuthenticateUser();
+            });
+        </script>
+	</body>
+</html>

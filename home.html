@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Home</title>
+
+	<link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@9.17.2/dist/sweetalert2.min.css" />
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+	<script src="https://kit.fontawesome.com/59b2f75b67.js" crossorigin="anonymous"></script>
+	<link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+	<div class="parentDiv">
+		<div class="container2">
+			<div class="nav__bar">
+				<div class="nav__content">
+					<div class="nav__greet">
+						<p class="greet_text">Hello,</p>
+						<p class="user_text" id="userlink">
+							Lorem Ipsum!
+						</p>
+					</div>
+					<a href=""><i id="signoutlink" class="fa-solid fa-right-from-bracket"></i></a>
+				</div>
+			</div>
+
+			<div class="cover__container">
+				<div class="cover__text">
+					<p class="cover__points" id="userPoints">
+						0
+					</p>
+					<p>Current Point</p>
+				</div>
+			</div>
+
+			<div class="disBottle">
+				<img src="https://dl.dropboxusercontent.com/s/ok86v0s7y6ilvdm/disposing.gif?dl=0" alt="" />
+			</div>
+
+			<div class="disLabel">
+				<p>Insert Empty Bottle</p>
+			</div>
+			<input id="submit_btn" type="submit" value="Send Points to Machine">
+			<div class="finish">
+				<input id="finish_btn" type="submit" value="Finish">
+			</div>
+		</div>
+	</div>
+
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.4.7/dist/sweetalert2.all.min.js"></script>
+	<script type="module">
+		import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
+
+		const firebaseConfig = {
+			apiKey: "AIzaSyB_TfQJQfMBhrsGjUMIrx5154SWUjjr2p4",
+			authDomain: "rvm-19-e9b1c.firebaseapp.com",
+			databaseURL: "https://rvm-19-e9b1c-default-rtdb.firebaseio.com",
+			projectId: "rvm-19-e9b1c",
+			storageBucket: "rvm-19-e9b1c.appspot.com",
+			messagingSenderId: "1069847515862",
+			appId: "1:1069847515862:web:289f226cb5b89dc39f6f77",
+		};
+
+		// Initialize Firebase
+		const app = initializeApp(firebaseConfig);
+
+		import {
+			getDatabase,
+			ref,
+			set,
+			child,
+			get,
+			update
+		} from "https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js";
+
+		const db = getDatabase();
+
+		let userlink = document.getElementById("userlink");
+		let userPoints = document.getElementById("userPoints");
+		const signoutlink = document.getElementById("signoutlink");
+		const getP = document.getElementById("getP");
+		const submit = document.getElementById('submit_btn');
+		const finish = document.getElementById('finish_btn');
+		var currentUser = null;
+
+		function getUsername() {
+			currentUser = JSON.parse(
+				sessionStorage.getItem("user")
+			);
+		}
+
+		function Signout() {
+			Swal.fire({
+				title: "Are you sure?",
+				text: "You want to Log out?",
+				icon: "warning",
+				showCancelButton: true,
+				confirmButtonColor: "#3085d6",
+				cancelButtonColor: "#d33",
+				confirmButtonText: "Log out",
+			}).then((result) => {
+				if (result.isConfirmed) {
+					setTimeout(() => {
+						sessionStorage.removeItem("user");
+						localStorage.removeItem("user");
+						localStorage.removeItem("keepLoggedIn");
+
+						const dbRef = ref(db);
+						update(ref(db, "CurrentUser/"), {
+							username: "guest",
+							status: "default",
+							pending: 0,
+						});
+						window.location = "index.html";
+					}, 1000);
+				}
+			});
+		}
+
+		function Finish() {
+			Swal.fire({
+				title: "Are you sure?",
+				text: "You are done with us?",
+				icon: "warning",
+				showCancelButton: true,
+				confirmButtonColor: "#3085d6",
+				cancelButtonColor: "#d33",
+				confirmButtonText: "Confirm",
+			}).then((result) => {
+				if (result.isConfirmed) {
+					setTimeout(() => {
+						sessionStorage.removeItem("user");
+						localStorage.removeItem("user");
+						localStorage.removeItem("keepLoggedIn");
+
+						const dbRef = ref(db);
+						update(ref(db, "CurrentUser/"), {
+							username: "guest",
+							status: "default",
+							pending: 0,
+						});
+						window.location = "index.html";
+					}, 1000);
+				}
+			});
+		}
+
+		window.onload = function () {
+			getUsername();
+			if (currentUser == null) {
+				userlink.innerText = "Create New Account";
+				userlink.classList.replace("nav-link", "btn");
+				userlink.classList.add("btn-primary");
+				userlink.href = "signup.html";
+
+				signoutlink.innerText = "Login";
+				signoutlink.classList.replace("nav-link", "btn");
+				signoutlink.classList.add("btn-success");
+				signoutlink.href = "index.html";
+			} else {
+				userlink.innerText = currentUser.username;
+				//header.innerText = "Welcome " + currentUser.fullname;
+				userlink.classList.replace("btn", "nav-link");
+				userlink.classList.remove("btn-primary");
+				userlink.href = "#";
+
+				//signoutlink.innerText = "Sign Out";
+				signoutlink.classList.replace("btn", "nav-link");
+				signoutlink.classList.remove("btn-success");
+				signoutlink.href = "javascript:Signout()";
+			}
+		};
+
+		signoutlink.addEventListener("click", function (event) {
+			event.preventDefault();
+			Signout();
+		});
+
+		var currentPoint;
+		function GetUserPoints() {
+			const dbRef = ref(db);
+			get(child(dbRef, "UsersList/" + currentUser.username)).then((snapshot) => {
+				if (snapshot.exists()) {
+					userPoints.innerText = snapshot.val().points;
+					currentPoint = snapshot.val().points;
+				}
+			});
+		}
+
+		function GetCurrentUser() {
+			const dbRef = ref(db);
+			get(child(dbRef, "CurrentUser/")).then((snapshot) => {
+				update(ref(db, "CurrentUser/"), {
+					username: currentUser.username,
+				});
+			});
+		}
+
+		setInterval(function () {
+			GetUserPoints();
+			GetCurrentUser();
+		}, 1000);
+
+		window.onbeforeunload = closingCode;
+		function closingCode() {
+			const dbRef = ref(db);
+			update(ref(db, "CurrentUser/"), {
+				username: "guest",
+				status: "default",
+				pending: 0,
+			});
+			return null;
+		}
+
+		async function SendPoints() {
+			const { value: formValues } = await Swal.fire({
+				title: 'Enter amount of points',
+				html: '<input type="number" id="swal-input1" class="swal2-input">',
+				focusConfirm: false,
+				preConfirm: () => {
+					return [
+						document.getElementById('swal-input1').value,
+					]
+				}
+			})
+
+			if (formValues) {
+				var getAmount = JSON.stringify(formValues[0]);
+				var sendAmount = JSON.parse(getAmount);
+				if (currentPoint >= sendAmount) {
+					Swal.fire(`You sent: ${sendAmount}`)
+					const dbRef = ref(db);
+
+					var newPoints = currentPoint - sendAmount;
+					var pendingPoint = parseFloat(sendAmount)
+					setTimeout(() => {
+						update(ref(db, "CurrentUser/"), {
+							status: "sending",
+							pending: pendingPoint
+						});
+
+						update(ref(db, "UsersList/" + currentUser.username), {
+							//username: currentUser.username,
+							//email: currentUser.email,
+							//password: currentUser.password,
+							//address: currentUser.address,
+							points: newPoints
+						});
+					}, 1000);
+				}
+				else {
+					Swal.fire(`Not enough points`)
+				}
+			}
+		}
+
+		submit.addEventListener("click", function (event) {
+			event.preventDefault();
+			SendPoints();
+		});
+
+		finish.addEventListener("click", function (event) {
+			event.preventDefault();
+			Finish();
+		});
+	</script>
+</body>
+
+</html>
